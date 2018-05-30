@@ -10,6 +10,9 @@ from django.contrib import messages
 from django.shortcuts import render
 
 from .forms import ContactForm, FilesForm, ContactFormSet
+import os
+import demo.Tool as Tool
+import pandas as pd
 
 
 # http://yuji.wordpress.com/2013/01/30/django-form-field-in-initial-data-requires-a-fieldfile-instance/
@@ -27,31 +30,6 @@ class HomePageView(TemplateView):
         return context
 
 
-class DefaultFormsetView(FormView):
-    template_name = 'demo/formset.html'
-    form_class = ContactFormSet
-
-
-class DefaultFormView(FormView):
-    template_name = 'demo/form.html'
-    form_class = ContactForm
-
-
-class DefaultFormByFieldView(FormView):
-    template_name = 'demo/form_by_field.html'
-    form_class = ContactForm
-
-
-class FormHorizontalView(FormView):
-    template_name = 'demo/form_horizontal.html'
-    form_class = ContactForm
-
-
-class FormInlineView(FormView):
-    template_name = 'demo/form_inline.html'
-    form_class = ContactForm
-
-
 class FormWithFilesView(FormView):
     template_name = 'demo/form_with_files.html'
     form_class = FilesForm
@@ -66,37 +44,24 @@ class FormWithFilesView(FormView):
             'file4': fieldfile,
         }
 
-
-class PaginationView(TemplateView):
-    template_name = 'demo/pagination.html'
-
+    
+class SearchTicker(TemplateView):
+    template_name = 'demo/home.html'
     def get_context_data(self, **kwargs):
         context = super(PaginationView, self).get_context_data(**kwargs)
-        lines = []
-        for i in range(200):
-            lines.append('Line %s' % (i + 1))
-        paginator = Paginator(lines, 10)
-        page = self.request.GET.get('page')
-        try:
-            show_lines = paginator.page(page)
-        except PageNotAnInteger:
-            # If page is not an integer, deliver first page.
-            show_lines = paginator.page(1)
-        except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
-            show_lines = paginator.page(paginator.num_pages)
-        context['lines'] = show_lines
+        print(context)
         return context
-
-
-class MiscView(TemplateView):
-    template_name = 'demo/misc.html'
-
+    
+    
 def search_ticker(request):
     #KQ = request.GET['KQ']
+    filter_df = pd.read_pickle('filtered.pickle')
+    ticker_word_df = pd.read_pickle('ticker_word_df.pickle')
+    word_return_df = pd.read_pickle('word_return_3month.pickle')
     print(request)
     ticker = request.GET['ticker']
     ticker2 = request.GET['ticker2']
-    print(ticker)
+    print(os.getcwd())
+    print(Tool.searchTicker(ticker_word_df, ticker, '2015'))
     print(ticker2)
-    return render(request, 'demo/home.html')
+    return render(request, 'demo/home.html', {'ticker': ticker, 'ticker2': ticker2})
