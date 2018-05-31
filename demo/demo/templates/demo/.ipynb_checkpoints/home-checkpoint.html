@@ -2,7 +2,7 @@
 {% load bootstrap3 %}
 
 {% block title %}
-Panagora Text Mining System
+Panagora NLP System
 {% endblock %}
 
 {% block home %}
@@ -10,13 +10,20 @@ active
 {% endblock %}
 
 {% block content %}
-    This is a search tool <em>system</em> for <strong>10KQ</strong>.
+    This is a keyword search tool <em>system</em> for <strong>10KQ annual reports</strong>.
 
-    <form action="/search_ticker/" method="get">
-            ticker(captialized): <input type="text" name="ticker" value = {{ticker}}>  <br>
-            ticker2(optional): <input type="text" name="ticker2" value = {{ticker2}}> <br>
-            year+QTR: &nbsp;&nbsp;<input type="text" name="year"> <br>
-        <input type = 'submit' value = 'OK'>
+    <form role="form" action="/search_ticker/" method="get">
+            year (2006-2016): <input type="text" name="year" value = {{year}}>  <br>
+            qtr (optinal, e.g. 'QTR1') <input type="text" name="qtr" value = {{qtr}}>  <br>
+            key_word(optional, e.g. dry powder inhaler) <input type="text" name="word" value = "{{word}}">  <br>
+        {% buttons submit='OK' reset="Cancel" %}{% endbuttons %}
     </form>
 
+{% autoescape off %}
+{{output}}
+{% endautoescape %}
+{% endblock %}
+
+{% block content2 %}
+<img src="data:image/png;base64,{{graphic|safe}}">
 {% endblock %}

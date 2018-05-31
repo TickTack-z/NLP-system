@@ -337,11 +337,6 @@ def plotSearchInterest(filter_df, word):
     pylab.ylabel("search interest")
     pylab.plot(xaxis,data_list,"g")        
     pylab.show()
-    
-    import cStringIO
-    graphic = cStringIO.StringIO()
-    canvas.print_png(graphic)
-    return graphic
 
 
 # In[ ]:

@@ -15,15 +15,14 @@ active
     <form role="form" action="/search_ticker/" method="get">
             year (2006-2016): <input type="text" name="year" value = {{year}}>  <br>
             qtr (optinal, e.g. 'QTR1') <input type="text" name="qtr" value = {{qtr}}>  <br>
-            key_word(optional, e.g. dry powder inhaler) <input type="text" name="word" value = "{{word}}">  <br>
+            key_word(e.g. dry powder inhaler) <input type="text" name="qtr" value = {{qtr}}>  <br>
         {% buttons submit='OK' reset="Cancel" %}{% endbuttons %}
     </form>
 
 {% autoescape off %}
 {{output}}
 {% endautoescape %}
-{% endblock %}
 
-{% block content2 %}
-<img src="data:image/png;base64,{{graphic|safe}}">
+
+
 {% endblock %}
