@@ -75,12 +75,9 @@ def search_ticker(request):
         print(word)
         f =  Tool.plotSearchInterest(filter_df, word)
         tickers = Tool.searchWords(filter_df, word, year+qtr)
-        print(tickers)
+        return_plot = Tool.returnPlot(word_return_df, word)
         
-        from django.http import HttpResponse
-        import base64
         
-        #return f
         context = {'year':year, 'qtr':qtr, 'word': word, 'tickers': tickers}
         return render(request, 'demo/home.html', context)
 

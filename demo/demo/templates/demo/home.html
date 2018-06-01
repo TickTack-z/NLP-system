@@ -10,17 +10,20 @@ active
 {% endblock %}
 
 {% block content %}
+<div class="panel panel-default">
+    <div class="panel-body">
     This is a keyword search tool <em>system</em> for <strong>10KQ annual reports</strong>.
-
     <form role="form" action="/search_ticker/" method="get">
             year (2006-2016): <input type="text" name="year" value = {{year}}>  <br>
-            qtr (optinal, e.g. 'QTR1') <input type="text" name="qtr" value = {{qtr}}>  <br>
-            key_word(optional, e.g. dry powder inhaler) <input type="text" name="word" value = "{{word}}">  <br>
+            qtr (optinal, e.g. 'QTR1'): <input type="text" name="qtr" value = {{qtr}}>  <br>
+            key_word(optional, e.g. dry powder inhaler): <input type="text" name="word" value = "{{word}}">  <br>
         {% buttons submit='OK' reset="Cancel" %}{% endbuttons %}
     </form>
-
-
+	</div>
+	  </div>
 {% if tickers %}
+<div class="panel panel-default">
+    <div class="panel-body">
 {% load static %}
 <b>Word:
 </b>
@@ -34,8 +37,15 @@ active
 Associated tickers in {{year}} {{qtr}}</b>:
 {{tickers}}
 <br>
+<b>ReturnPlot:</b>
+<br>
+<img src="{% static "return.png"%}?cachebuster=blah24" height="400", width="1000"/>
+
+<br>
 <b>Google search of interest:</b>
 <img src="{% static "foo.png"%}?cachebuster=blah23" height="400", width="1200"/>
+	</div>
+	  </div>
 {% endif %}
 
 {% autoescape off %}

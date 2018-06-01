@@ -348,6 +348,7 @@ def plotSearchInterest(filter_df, word):
         os.remove(r'common_static/foo.png')
     except OSError:
         pass
+    pylab.tight_layout()
     pylab.savefig(r'common_static/foo.png', format = 'png')
     pylab.clf()
     #return f.getvalue()
@@ -466,3 +467,44 @@ def wordOfYear(new_df, filter_df, year):
     return temp_df2
 
 
+
+
+
+
+#In []
+#In []
+#In []
+
+def returnPlot(word_return_df_full, keyword):
+    word_return_df_full=  word_return_df_full.reindex_axis(sorted(word_return_df_full.columns), axis=1)
+
+    data_list = list(map(lambda x: np.median(x), word_return_df_full[word_return_df_full['word:'] == keyword].drop(columns = ['word:', 'search_interest', 'topic', 'combined_words']).values[0]))
+
+    xticks = word_return_df_full[word_return_df_full['word:'] == keyword].drop(columns = ['word:', 'search_interest', 'topic', 'combined_words']).columns
+    xticks = list(xticks)
+    xticks.sort()
+
+    import matplotlib
+    matplotlib.use('agg')
+    import pylab
+    some_var = pylab.figure(1, figsize=(22, 8))
+    xaxis = range(len(xticks))
+    pylab.xticks(xaxis, xticks, rotation = 60, fontsize = 13)
+    #pylab.xlabel("year_month")
+    #pylab.ylabel("median return")
+    pylab.xlim(np.mean(xaxis), np.max(xaxis))
+    pylab.plot(xaxis,data_list,"g", marker='o')
+    pylab.xlabel("year_quarter")
+    pylab.ylabel("past three month's return (percentage)")
+
+    pylab.show()
+
+    import os
+
+    try:
+        os.remove(r'common_static/return.png')
+    except OSError:
+        pass
+    pylab.tight_layout()
+    pylab.savefig(r'common_static/return.png', format = 'png')
+    pylab.clf()
