@@ -329,19 +329,29 @@ def plotSearchInterest(filter_df, word):
     xticks = cal.getWeekDaysMonthStr()
     xticks.reverse()
     
+    import matplotlib
+    matplotlib.use('agg')
     import pylab
-    pylab.figure(1, figsize=(22, 8))
+    some_var = pylab.figure(1, figsize=(22, 8))
     xaxis = range(len(xticks))
-    pylab.xticks(xaxis, xticks, rotation = 60, fontsize = 7)
+    pylab.xticks(xaxis[::6], xticks[::6], rotation = 60, fontsize = 13)
     pylab.xlabel("year_month")
     pylab.ylabel("search interest")
     pylab.plot(xaxis,data_list,"g")        
     pylab.show()
     
-    import cStringIO
-    graphic = cStringIO.StringIO()
-    canvas.print_png(graphic)
-    return graphic
+    import io
+    import os
+    f = io.BytesIO()
+    
+    try:
+        os.remove(r'common_static/foo.png')
+    except OSError:
+        pass
+    pylab.savefig(r'common_static/foo.png', format = 'png')
+    pylab.clf()
+    #return f.getvalue()
+    
 
 
 # In[ ]:
@@ -397,15 +407,14 @@ def wordOfQuarter(new_df, filter_df, qtr):
 
         year_month = convertColumns2yearmonth(columns)
         
-        abc = temp_df.at[idx, columns]
         temp_df.at[idx, 'mean'] = np.mean(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=3 else np.nan
         temp_df.at[idx, 'median'] = np.median(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=3 else np.nan
         temp_df.at[idx, 'std'] = np.std(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=3 else np.nan
         
     
     temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median', 'std']].dropna().merge(filter_df[['word:',qtr]], left_on = ['word:'], right_on = ['word:'])
-    temp_df2.columns = ['key_word', 'past_3_month_annualized_return_percentage_mean','median','std', 'tickers']
-    temp_df2['past_3_month_annualized_return_percentage_mean'] = temp_df2['past_3_month_annualized_return_percentage_mean'].apply(lambda x: ((x/100.0+1)**4-1)*100)
+    temp_df2.columns = ['key_word', 'annualized_return_percentage_mean','median','std', 'tickers']
+    temp_df2['annualized_return_percentage_mean'] = temp_df2['annualized_return_percentage_mean'].apply(lambda x: ((x/100.0+1)**4-1)*100)
     temp_df2['median'] = temp_df2['median'].apply(lambda x: ((x/100.0+1)**4-1)*100)    
     return temp_df2
 
@@ -450,9 +459,10 @@ def wordOfYear(new_df, filter_df, year):
         temp_df.at[idx, 'std'] = np.std(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=9 else np.nan
     
     temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median' ,'std']].dropna().merge(temp_filter_df[['word:',qtr]], left_on = ['word:'], right_on = ['word:'])
-    temp_df2.columns = ['key_word', 'annualized_return_percentage_mean','median','std', 'tickers']
-    temp_df2['annualized_return_percentage_mean'] = temp_df2['annualized_return_percentage_mean'].apply(lambda x: ((x/100.0+1)**4-1)*100)
+    temp_df2.columns = ['key_word', 'return_percentage_mean','median','std', 'tickers']
+    temp_df2['return_percentage_mean'] = temp_df2['return_percentage_mean'].apply(lambda x: ((x/100.0+1)**4-1)*100)
     temp_df2['median'] = temp_df2['median'].apply(lambda x: ((x/100.0+1)**4-1)*100)    
     temp_df2['tickers'] = temp_df2['tickers'].apply(lambda x: list(set(x)))
     return temp_df2
+
 

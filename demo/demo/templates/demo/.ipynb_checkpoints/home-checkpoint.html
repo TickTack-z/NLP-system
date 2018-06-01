@@ -19,11 +19,11 @@ active
         {% buttons submit='OK' reset="Cancel" %}{% endbuttons %}
     </form>
 
+{% if pic == 1 %}
+{% load static %}
+<img src="{% static "foo.png"%}?cachebuster=blah23"/>
+{% endif %}
 {% autoescape off %}
 {{output}}
 {% endautoescape %}
-{% endblock %}
-
-{% block content2 %}
-<img src="data:image/png;base64,{{graphic|safe}}">
 {% endblock %}

@@ -19,11 +19,26 @@ active
         {% buttons submit='OK' reset="Cancel" %}{% endbuttons %}
     </form>
 
+
+{% if tickers %}
+{% load static %}
+<b>Word:
+</b>
+{{word}}
+<br>
+<b>YearQtr:
+</b>
+{{year}}{{qtr}}
+<br>
+<b>
+Associated tickers in {{year}} {{qtr}}</b>:
+{{tickers}}
+<br>
+<b>Google search of interest:</b>
+<img src="{% static "foo.png"%}?cachebuster=blah23" height="400", width="1200"/>
+{% endif %}
+
 {% autoescape off %}
 {{output}}
 {% endautoescape %}
-{% endblock %}
-
-{% block content2 %}
-<img src="data:image/png;base64,{{graphic|safe}}">
 {% endblock %}

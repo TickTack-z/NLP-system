@@ -73,14 +73,15 @@ def search_ticker(request):
         return render(request, 'demo/home.html', context)
     else:
         print(word)
-        Tool.plotSearchInterest(filter_df, 'sickle cell anemia')
+        f =  Tool.plotSearchInterest(filter_df, word)
+        tickers = Tool.searchWords(filter_df, word, year+qtr)
+        print(tickers)
         
-        graphic = cStringIO.StringIO()
-        canvas.print_png(graphic)
+        from django.http import HttpResponse
+        import base64
         
-        context = {'year':year, 'qtr':qtr, 'word' : word, 'graphic': graphic}
-        
-        
+        #return f
+        context = {'year':year, 'qtr':qtr, 'word': word, 'tickers': tickers}
         return render(request, 'demo/home.html', context)
 
 '''

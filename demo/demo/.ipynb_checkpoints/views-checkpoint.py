@@ -73,13 +73,14 @@ def search_ticker(request):
         return render(request, 'demo/home.html', context)
     else:
         print(word)
-        Tool.plotSearchInterest(filter_df, 'sickle cell anemia')
-        graphic = cStringIO.StringIO()
-        canvas.print_png(graphic)
+        f =  Tool.plotSearchInterest(filter_df, word)
         
-        context = {'year':year, 'qtr':qtr, 'word' : word, 'graphic': graphic}
+        from django.http import HttpResponse
+        #f = HttpResponse(f, content_type="image/png")
+        import base64
         
-        
+        #return f
+        context = {'year':year, 'qtr':qtr, 'word': word, 'pic': 1}
         return render(request, 'demo/home.html', context)
 
 '''
