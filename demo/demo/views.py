@@ -69,6 +69,7 @@ def search_ticker(request):
         sort_df['key_word'] = sort_df['key_word'].apply(lambda x: addHyperLink(year, qtr, x))
         pd.set_option('display.max_colwidth', -1)
         pd.set_option('display.width', None)
+
         context = {'year':year, 'qtr':qtr, 'output': HTML(sort_df.to_html(escape = False)).__html__().replace('<td><a ', '<td nowrap><a ')}
         return render(request, 'demo/home.html', context)
     else:
@@ -77,8 +78,19 @@ def search_ticker(request):
         tickers = Tool.searchWords(filter_df, word, year+qtr)
         return_plot = Tool.returnPlot(word_return_df, word)
         
+        if qtr=='':
+            from_date = r'01/01/' + year
+            to_date = r'12/31/' + year
+        else:
+            month = int(qtr[-1]) * 3
+            month = str(month)
+
+            from_date = (pd._libs.tslibs.period.Period(year + '-' + month,'M') - 6).strftime(r'%m/01/%Y')
+            to_date = (pd._libs.tslibs.period.Period(year + '-' + month,'M') - 3 ).strftime(r'%m/%d/%Y')
+
+        news= Tool.scrape_news_summaries(word, from_date, to_date)
         
-        context = {'year':year, 'qtr':qtr, 'word': word, 'tickers': tickers}
+        context = {'year':year, 'qtr':qtr, 'word': word, 'tickers': tickers, 'news':news, 'from_date': from_date, 'to_date': to_date}
         return render(request, 'demo/home.html', context)
 
 '''

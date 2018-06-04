@@ -21,6 +21,8 @@ active
     </form>
 	</div>
 	  </div>
+<!-- content for words -->
+
 {% if tickers %}
 <div class="panel panel-default">
     <div class="panel-body">
@@ -43,12 +45,61 @@ Associated tickers in {{year}} {{qtr}}</b>:
 
 <br>
 <b>Google search of interest:</b>
-<img src="{% static "foo.png"%}?cachebuster=blah23" height="400", width="1200"/>
+<img src="{% static "foo.png"%}?cachebuster=blah23" height="400", width="1000"/>
 	</div>
 	  </div>
 {% endif %}
 
+<!-- table for keywords -->
+{% if output %}
 {% autoescape off %}
-{{output}}
+<div class="panel panel-default">
+    <div class="panel-body">
+	<article>
+	    <header>Hottest keyword for {{year}}{{qtr}} based on past performance:</header>
+	</article>
+        {{output}}
+    </div>
+</div>
 {% endautoescape %}
+{% endif %}
+
+{% if news %}
+<div class = "row">
+<div class = "col-lg-8" >
+<div class="panel panel-default">
+    <div class="panel-body">
+<b> Google news for <em>{{word}}</em> in {{from_date}} to {{to_date}}: </b>
+<br>
+<div class="panel-group" id="accordion">
+{% for a,b,c in news %}
+<div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{forloop.counter}}">{{a}}</a>
+        </h4>
+      </div>
+      <div id="collapse{{forloop.counter}}" class="panel-collapse collapse">
+        <div class="panel-body">{{b}}: {{c}}</div>
+      </div>
+</div>
+{% endfor %}
+</div>
+
+</div>
+</div>
+</div>
+
+<div class = "col-lg-4" >
+<div class="panel panel-default">
+    <div class="panel-body">
+
+</div>
+</div>
+
+</div>
+</div>
+{% endif %}
+
+
 {% endblock %}

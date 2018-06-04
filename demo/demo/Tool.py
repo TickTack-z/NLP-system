@@ -508,3 +508,33 @@ def returnPlot(word_return_df_full, keyword):
     pylab.tight_layout()
     pylab.savefig(r'common_static/return.png', format = 'png')
     pylab.clf()
+
+import requests,  bs4
+
+def scrape_news_summaries(s, from_date, to_date):
+    headers = {
+        "User-Agent":
+            "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36"
+    }
+    payload = {'as_epq': s, 'tbs':'cdr:1,cd_min:'+ from_date+',cd_max:'+to_date, 'tbm':'nws'}
+    #01/01/2015
+    #01/01/2015
+    r = requests.get("https://www.google.com/search", params=payload, headers=headers)
+
+    soup = bs4.BeautifulSoup(r.content, 'html5lib')
+    st_divs = soup.findAll("div", {"class": "st"})
+    news_summaries = []
+    header = []
+    attrib = []
+    for st_div in st_divs:
+        news_summaries.append(st_div.text)
+        
+    st_divs = soup.findAll("div", {"class": "slp"})
+    for st_div in st_divs:    
+        attrib.append(st_div.text)
+    
+    st_divs = soup.findAll("a", {"class": "l"})
+    for st_div in st_divs:    
+        header.append(st_div.text)
+        
+    return list(zip(header, attrib, news_summaries))
