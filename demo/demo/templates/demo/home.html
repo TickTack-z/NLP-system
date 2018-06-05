@@ -14,8 +14,8 @@ active
     <div class="panel-body">
     This is a keyword search tool <em>system</em> for <strong>10KQ annual reports</strong>.
     <form role="form" action="/search_ticker/" method="get">
-            year (2006-2016): <input type="text" name="year" value = {{year}}>  <br>
-            qtr (optinal, e.g. 'QTR1'): <input type="text" name="qtr" value = {{qtr}}>  <br>
+            year (2006-2016, e.g. 2010): <input type="text" name="year" value = {{year}}>  <br>
+            qtr (optinal, e.g. QTR1): <input type="text" name="qtr" value = {{qtr}}>  <br>
             key_word(optional, e.g. dry powder inhaler): <input type="text" name="word" value = "{{word}}">  <br>
         {% buttons submit='OK' reset="Cancel" %}{% endbuttons %}
     </form>
@@ -56,7 +56,8 @@ Associated tickers in {{year}} {{qtr}}</b>:
 <div class="panel panel-default">
     <div class="panel-body">
 	<article>
-	    <header>Hottest keyword for {{year}}{{qtr}} based on past performance:</header>
+	    <b><header>Hottest keyword for {{year}}{{qtr}} based on past performance:</header></b>
+	    <header>Type something in the input field to filter the table for keywords:</header>
 	</article>
         {{output}}
     </div>
@@ -79,7 +80,7 @@ Associated tickers in {{year}} {{qtr}}</b>:
           <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{forloop.counter}}">{{a}}</a>
         </h4>
       </div>
-      <div id="collapse{{forloop.counter}}" class="panel-collapse collapse">
+      <div id="collapse{{forloop.counter}}" class="panel-collapse collapse{% if forloop.counter == 1 %} in {% endif %}">
         <div class="panel-body">{{b}}: {{c}}</div>
       </div>
 </div>
@@ -93,6 +94,11 @@ Associated tickers in {{year}} {{qtr}}</b>:
 <div class = "col-lg-4" >
 <div class="panel panel-default">
     <div class="panel-body">
+<b> Sentiment analysis panel:  </b>
+<br>
+<img src="{% static "senti.png"%}?cachebuster=blah224"  width="320"/>
+
+<br>
 
 </div>
 </div>
@@ -100,6 +106,5 @@ Associated tickers in {{year}} {{qtr}}</b>:
 </div>
 </div>
 {% endif %}
-
 
 {% endblock %}

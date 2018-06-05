@@ -70,7 +70,25 @@ def search_ticker(request):
         pd.set_option('display.max_colwidth', -1)
         pd.set_option('display.width', None)
 
-        context = {'year':year, 'qtr':qtr, 'output': HTML(sort_df.to_html(escape = False)).__html__().replace('<td><a ', '<td nowrap><a ')}
+        output = r'<input class="form-control" id="myInput" type="text" placeholder="Search..">'
+        output += HTML(sort_df.to_html(escape = False)).__html__().replace('<td><a ', '<td nowrap><a ').replace('class="dataframe"', 'class="table table-bordered table-striped"').replace(r'<tbody>', r'<tbody id="myTable">')
+        
+        output += r'''
+<script>
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+          $("#myTable tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                      });
+                      });
+                      </script>
+
+        '''
+
+
+        context = {'year':year, 'qtr':qtr, 'output': output}
         return render(request, 'demo/home.html', context)
     else:
         print(word)
@@ -88,7 +106,13 @@ def search_ticker(request):
             from_date = (pd._libs.tslibs.period.Period(year + '-' + month,'M') - 6).strftime(r'%m/01/%Y')
             to_date = (pd._libs.tslibs.period.Period(year + '-' + month,'M') - 3 ).strftime(r'%m/%d/%Y')
 
-        news= Tool.scrape_news_summaries(word, from_date, to_date)
+
+        try:
+            news= Tool.scrape_news_summaries(word, from_date, to_date)
+            news_text = " ".join([(" ").join(k) for k in news])
+            Tool.plotSenti(news_text)
+        except:
+            news = None
         
         context = {'year':year, 'qtr':qtr, 'word': word, 'tickers': tickers, 'news':news, 'from_date': from_date, 'to_date': to_date}
         return render(request, 'demo/home.html', context)

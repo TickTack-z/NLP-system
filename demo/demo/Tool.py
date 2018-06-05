@@ -493,7 +493,7 @@ def returnPlot(word_return_df_full, keyword):
     #pylab.xlabel("year_month")
     #pylab.ylabel("median return")
     pylab.xlim(np.mean(xaxis), np.max(xaxis))
-    pylab.plot(xaxis,data_list,"g", marker='o')
+    pylab.plot(xaxis,data_list,"g", marker='o',markersize=15)
     pylab.xlabel("year_quarter")
     pylab.ylabel("past three month's return (percentage)")
 
@@ -538,3 +538,56 @@ def scrape_news_summaries(s, from_date, to_date):
         header.append(st_div.text)
         
     return list(zip(header, attrib, news_summaries))
+
+
+
+
+
+
+import numpy as np
+import boto3
+import json
+
+
+def plotSenti(text):
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
+    senti_result=comprehend.detect_sentiment(Text = text , LanguageCode='en')
+    for k in senti_result['SentimentScore'].keys():
+        senti_result['SentimentScore'][k] = senti_result['SentimentScore'][k] * 10.0
+        if senti_result['SentimentScore'][k] >= 1.0:
+            senti_result['SentimentScore'][k] =  1.0
+   #=======自己设置开始============
+    #标签
+    labels = np.array(list(senti_result['SentimentScore'].keys()))
+    #数据个数
+    dataLenth = 4
+    #数据
+    data = np.array(list(senti_result['SentimentScore'].values()))
+    #========自己设置结束============
+
+    angles = np.linspace(0, 2*np.pi, dataLenth, endpoint=False)
+    data = np.concatenate((data, [data[0]])) # 闭合
+    angles = np.concatenate((angles, [angles[0]])) # 闭合
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, polar=True)# polar参数！！
+    ax.plot(angles, data, 'bo-', linewidth=2)# 画线
+    ax.fill(angles, data, facecolor='r', alpha=0.25)# 填充
+    ax.set_thetagrids(angles * 180/np.pi, labels, fontproperties="SimHei", size = 15)
+    ax.set_title("", va='bottom', fontproperties="SimHei")
+    ax.set_rlim(0,1.0)
+    ax.grid(True)
+    plt.show()
+    
+    import os
+    try:
+        os.remove(r'common_static/senti.png')
+    except OSError:
+        pass
+    plt.tight_layout()
+    plt.savefig(r'common_static/senti.png', format = 'png')
+    plt.clf()
+
