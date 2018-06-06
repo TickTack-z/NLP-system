@@ -107,12 +107,9 @@ $(document).ready(function(){
             to_date = (pd._libs.tslibs.period.Period(year + '-' + month,'M') - 3 ).strftime(r'%m/%d/%Y')
 
 
-        try:
-            news= Tool.scrape_news_summaries(word, from_date, to_date)
-            news_text = " ".join([(" ").join(k) for k in news])
-            Tool.plotSenti(news_text)
-        except:
-            news = None
+        news= Tool.scrape_news_summaries(word, from_date, to_date)
+        news_text = " ".join([(" ").join(k) for k in news])
+        Tool.plotSenti(news_text)
         
         context = {'year':year, 'qtr':qtr, 'word': word, 'tickers': tickers, 'news':news, 'from_date': from_date, 'to_date': to_date}
         return render(request, 'demo/home.html', context)

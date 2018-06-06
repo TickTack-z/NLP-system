@@ -556,7 +556,7 @@ def plotSenti(text):
     comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
     senti_result=comprehend.detect_sentiment(Text = text , LanguageCode='en')
     for k in senti_result['SentimentScore'].keys():
-        senti_result['SentimentScore'][k] = senti_result['SentimentScore'][k] * 10.0
+        senti_result['SentimentScore'][k] = senti_result['SentimentScore'][k] * 40.0
         if senti_result['SentimentScore'][k] >= 1.0:
             senti_result['SentimentScore'][k] =  1.0
    #=======自己设置开始============
