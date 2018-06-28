@@ -125,7 +125,10 @@ def searchWords(df, word, quarter = ''):
         idx = df.index[df['word:'] == word].tolist()[0]                
         if type(quarter) == type(1) or len(quarter) == 4:
             quarter = str(quarter)
-            quarters = [quarter + i for i in ['QTR1', 'QTR2', 'QTR3', 'QTR4']]
+            if quarter == '2018':
+                quarters = [quarter + i for i in ['QTR1', 'QTR2']]
+            else:
+                quarters = [quarter + i for i in ['QTR1', 'QTR2', 'QTR3', 'QTR4']]
             res = []
             for j in quarters:
                 res += df.at[idx, j]
@@ -162,7 +165,10 @@ def searchTicker(df, ticker, quarter = ''):
         idx = ticker        
         if type(quarter) == type(1) or len(quarter) == 4:
             quarter = str(quarter)
-            quarters = [quarter + i for i in ['QTR1', 'QTR2', 'QTR3', 'QTR4']]
+            if quarter == '2018':
+                quarters = [quarter + i for i in ['QTR1', 'QTR2']]
+            else:
+                quarters = [quarter + i for i in ['QTR1', 'QTR2', 'QTR3', 'QTR4']]
             res = []
             for j in quarters:
                 res += df.at[idx, j]
@@ -216,7 +222,10 @@ def search2Ticker(df, ticker1, ticker2, quarter = ''):
         idx = ticker1
         if type(quarter) == type(1) or len(quarter) == 4:
             quarter = str(quarter)
-            quarters = [quarter + i for i in ['QTR1', 'QTR2', 'QTR3', 'QTR4']]
+            if quarter == '2018':
+                quarters = [quarter + i for i in ['QTR1', 'QTR2']]
+            else:
+                quarters = [quarter + i for i in ['QTR1', 'QTR2', 'QTR3', 'QTR4']]
             res = []
             for j in quarters:
                 res += df.at[idx, j]
@@ -241,7 +250,10 @@ def search2Ticker(df, ticker1, ticker2, quarter = ''):
         idx = ticker2
         if type(quarter) == type(1) or len(quarter) == 4:
             quarter = str(quarter)
-            quarters = [quarter + i for i in ['QTR1', 'QTR2', 'QTR3', 'QTR4']]
+            if quarter == '2018':
+                quarters = [quarter + i for i in ['QTR1', 'QTR2']]
+            else:
+                quarters = [quarter + i for i in ['QTR1', 'QTR2', 'QTR3', 'QTR4']]
             res = []
             for j in quarters:
                 res += df.at[idx, j]
@@ -447,6 +459,8 @@ def wordOfYear(new_df, filter_df, year):
     
     for idx in temp_df.index:
         for qtr in [str(year)+k for k in ['QTR1', 'QTR2','QTR3', 'QTR4']]:            
+            if qtr in ['2018QTR3','2018QTR4']:
+                continue
             columns = qtr
 
             year_month = convertColumns2yearmonth(columns)
@@ -458,12 +472,16 @@ def wordOfYear(new_df, filter_df, year):
         temp_df.at[idx, 'mean'] = np.mean(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=9 else np.nan
         temp_df.at[idx, 'median'] = np.median(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=9 else np.nan
         temp_df.at[idx, 'std'] = np.std(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=9 else np.nan
+
     
     temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median' ,'std']].dropna().merge(temp_filter_df[['word:',qtr]], left_on = ['word:'], right_on = ['word:'])
     temp_df2.columns = ['key_word', 'return_percentage_mean','median','std', 'tickers']
-    temp_df2['return_percentage_mean'] = temp_df2['return_percentage_mean'].apply(lambda x: ((x/100.0+1)**4-1)*100)
-    temp_df2['median'] = temp_df2['median'].apply(lambda x: ((x/100.0+1)**4-1)*100)    
-    temp_df2['tickers'] = temp_df2['tickers'].apply(lambda x: list(set(x)))
+    temp_df2['return_percentage_mean'] = temp_df2['return_percentage_mean']
+    temp_df2['median'] = temp_df2['median']
+    from collections import Counter
+    #temp_df2['tickers'] = temp_df2['tickers'].apply(lambda x: list(set(x)))
+    temp_df2['tickers'] = temp_df2['tickers'].apply(lambda x: [k for k,w in Counter(x).most_common() if w >3])
+    
     return temp_df2
 
 
@@ -555,6 +573,8 @@ def plotSenti(text):
     import matplotlib.pyplot as plt
     comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
     senti_result=comprehend.detect_sentiment(Text = text , LanguageCode='en')
+    
+    ###################################################################
     for k in senti_result['SentimentScore'].keys():
         senti_result['SentimentScore'][k] = senti_result['SentimentScore'][k] * 40.0
         if senti_result['SentimentScore'][k] >= 1.0:

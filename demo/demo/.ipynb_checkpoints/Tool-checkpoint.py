@@ -334,11 +334,11 @@ def plotSearchInterest(filter_df, word):
     import pylab
     some_var = pylab.figure(1, figsize=(22, 8))
     xaxis = range(len(xticks))
-    pylab.xticks(xaxis, xticks, rotation = 60, fontsize = 7)
+    pylab.xticks(xaxis[::6], xticks[::6], rotation = 60, fontsize = 13)
     pylab.xlabel("year_month")
     pylab.ylabel("search interest")
     pylab.plot(xaxis,data_list,"g")        
-    #pylab.show()
+    pylab.show()
     
     import io
     import os
@@ -348,6 +348,7 @@ def plotSearchInterest(filter_df, word):
         os.remove(r'common_static/foo.png')
     except OSError:
         pass
+    pylab.tight_layout()
     pylab.savefig(r'common_static/foo.png', format = 'png')
     pylab.clf()
     #return f.getvalue()
@@ -413,8 +414,8 @@ def wordOfQuarter(new_df, filter_df, qtr):
         
     
     temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median', 'std']].dropna().merge(filter_df[['word:',qtr]], left_on = ['word:'], right_on = ['word:'])
-    temp_df2.columns = ['key_word', 'past_3_month_annualized_return_percentage_mean','median','std', 'tickers']
-    temp_df2['past_3_month_annualized_return_percentage_mean'] = temp_df2['past_3_month_annualized_return_percentage_mean'].apply(lambda x: ((x/100.0+1)**4-1)*100)
+    temp_df2.columns = ['key_word', 'annualized_return_percentage_mean','median','std', 'tickers']
+    temp_df2['annualized_return_percentage_mean'] = temp_df2['annualized_return_percentage_mean'].apply(lambda x: ((x/100.0+1)**4-1)*100)
     temp_df2['median'] = temp_df2['median'].apply(lambda x: ((x/100.0+1)**4-1)*100)    
     return temp_df2
 
@@ -459,10 +460,136 @@ def wordOfYear(new_df, filter_df, year):
         temp_df.at[idx, 'std'] = np.std(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=9 else np.nan
     
     temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median' ,'std']].dropna().merge(temp_filter_df[['word:',qtr]], left_on = ['word:'], right_on = ['word:'])
-    temp_df2.columns = ['key_word', 'past_3_month_annualized_return_percentage_mean','median','std', 'tickers']
-    temp_df2['past_3_month_annualized_return_percentage_mean'] = temp_df2['past_3_month_annualized_return_percentage_mean'].apply(lambda x: ((x/100.0+1)**4-1)*100)
+    temp_df2.columns = ['key_word', 'return_percentage_mean','median','std', 'tickers']
+    temp_df2['return_percentage_mean'] = temp_df2['return_percentage_mean'].apply(lambda x: ((x/100.0+1)**4-1)*100)
     temp_df2['median'] = temp_df2['median'].apply(lambda x: ((x/100.0+1)**4-1)*100)    
     temp_df2['tickers'] = temp_df2['tickers'].apply(lambda x: list(set(x)))
     return temp_df2
 
+
+
+
+
+
+#In []
+#In []
+#In []
+
+def returnPlot(word_return_df_full, keyword):
+    word_return_df_full=  word_return_df_full.reindex_axis(sorted(word_return_df_full.columns), axis=1)
+
+    data_list = list(map(lambda x: np.median(x), word_return_df_full[word_return_df_full['word:'] == keyword].drop(columns = ['word:', 'search_interest', 'topic', 'combined_words']).values[0]))
+
+    xticks = word_return_df_full[word_return_df_full['word:'] == keyword].drop(columns = ['word:', 'search_interest', 'topic', 'combined_words']).columns
+    xticks = list(xticks)
+    xticks.sort()
+
+    import matplotlib
+    matplotlib.use('agg')
+    import pylab
+    some_var = pylab.figure(1, figsize=(22, 8))
+    xaxis = range(len(xticks))
+    pylab.xticks(xaxis, xticks, rotation = 60, fontsize = 13)
+    #pylab.xlabel("year_month")
+    #pylab.ylabel("median return")
+    pylab.xlim(np.mean(xaxis), np.max(xaxis))
+    pylab.plot(xaxis,data_list,"g", marker='o',markersize=15)
+    pylab.xlabel("year_quarter")
+    pylab.ylabel("past three month's return (percentage)")
+
+    pylab.show()
+
+    import os
+
+    try:
+        os.remove(r'common_static/return.png')
+    except OSError:
+        pass
+    pylab.tight_layout()
+    pylab.savefig(r'common_static/return.png', format = 'png')
+    pylab.clf()
+
+import requests,  bs4
+
+def scrape_news_summaries(s, from_date, to_date):
+    headers = {
+        "User-Agent":
+            "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36"
+    }
+    payload = {'as_epq': s, 'tbs':'cdr:1,cd_min:'+ from_date+',cd_max:'+to_date, 'tbm':'nws'}
+    #01/01/2015
+    #01/01/2015
+    r = requests.get("https://www.google.com/search", params=payload, headers=headers)
+
+    soup = bs4.BeautifulSoup(r.content, 'html5lib')
+    st_divs = soup.findAll("div", {"class": "st"})
+    news_summaries = []
+    header = []
+    attrib = []
+    for st_div in st_divs:
+        news_summaries.append(st_div.text)
+        
+    st_divs = soup.findAll("div", {"class": "slp"})
+    for st_div in st_divs:    
+        attrib.append(st_div.text)
+    
+    st_divs = soup.findAll("a", {"class": "l"})
+    for st_div in st_divs:    
+        header.append(st_div.text)
+        
+    return list(zip(header, attrib, news_summaries))
+
+
+
+
+
+
+import numpy as np
+import boto3
+import json
+
+
+def plotSenti(text):
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
+    senti_result=comprehend.detect_sentiment(Text = text , LanguageCode='en')
+    
+    ###################################################################
+    #for k in senti_result['SentimentScore'].keys():
+    #    senti_result['SentimentScore'][k] = senti_result['SentimentScore'][k] * 40.0
+    #    if senti_result['SentimentScore'][k] >= 1.0:
+    #        senti_result['SentimentScore'][k] =  1.0
+   #=======自己设置开始============
+    #标签
+    labels = np.array(list(senti_result['SentimentScore'].keys()))
+    #数据个数
+    dataLenth = 4
+    #数据
+    data = np.array(list(senti_result['SentimentScore'].values()))
+    #========自己设置结束============
+
+    angles = np.linspace(0, 2*np.pi, dataLenth, endpoint=False)
+    data = np.concatenate((data, [data[0]])) # 闭合
+    angles = np.concatenate((angles, [angles[0]])) # 闭合
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, polar=True)# polar参数！！
+    ax.plot(angles, data, 'bo-', linewidth=2)# 画线
+    ax.fill(angles, data, facecolor='r', alpha=0.25)# 填充
+    ax.set_thetagrids(angles * 180/np.pi, labels, fontproperties="SimHei", size = 15)
+    ax.set_title("", va='bottom', fontproperties="SimHei")
+    ax.set_rlim(0,1.0)
+    ax.grid(True)
+    plt.show()
+    
+    import os
+    try:
+        os.remove(r'common_static/senti.png')
+    except OSError:
+        pass
+    plt.tight_layout()
+    plt.savefig(r'common_static/senti.png', format = 'png')
+    plt.clf()
 

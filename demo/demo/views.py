@@ -49,6 +49,7 @@ class SearchTicker(TemplateView):
 def search_ticker(request):
     #KQ = request.GET['KQ']
     word_return_df = pd.read_pickle('word_return_3month_full.pickle')
+    word_return_df2 = pd.read_pickle('word_return_3month_full2.pickle')
     
     filter_df = pd.read_pickle('filtered.pickle') 
     print(request)
@@ -62,7 +63,8 @@ def search_ticker(request):
             return url
 
         if qtr == '':
-            sort_df = Tool.wordOfYear(word_return_df, filter_df, year+qtr).round(2)
+            #sort_df = Tool.wordOfYear(word_return_df, filter_df, year+qtr).round(2)
+            sort_df = Tool.wordOfYear(word_return_df2, filter_df, year+qtr).round(2)
         else:
             sort_df = Tool.wordOfQuarter(word_return_df, filter_df, year+qtr).round(2)
 
@@ -92,9 +94,9 @@ $(document).ready(function(){
         return render(request, 'demo/home.html', context)
     else:
         print(word)
-        f =  Tool.plotSearchInterest(filter_df, word)
+        #f =  Tool.plotSearchInterest(filter_df, word)
         tickers = Tool.searchWords(filter_df, word, year+qtr)
-        return_plot = Tool.returnPlot(word_return_df, word)
+        #return_plot = Tool.returnPlot(word_return_df, word)
         
         if qtr=='':
             from_date = r'01/01/' + year

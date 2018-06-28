@@ -14,7 +14,7 @@ active
     <div class="panel-body">
     This is a keyword search tool <em>system</em> for <strong>10KQ annual reports</strong>.
     <form role="form" action="/search_ticker/" method="get">
-            year (2006-2016, e.g. 2010): <input type="text" name="year" value = {{year}}>  <br>
+            year (2006-2018, e.g. 2010): <input type="text" name="year" value = {{year}}>  <br>
             qtr (optinal, e.g. QTR1): <input type="text" name="qtr" value = {{qtr}}>  <br>
             key_word(optional, e.g. dry powder inhaler): <input type="text" name="word" value = "{{word}}">  <br>
         {% buttons submit='OK' reset="Cancel" %}{% endbuttons %}
@@ -37,8 +37,9 @@ active
 <br>
 <b>
 Associated tickers in {{year}} {{qtr}}</b>:
-{{tickers}}
 <br>
+{{tickers}}
+<!--
 <b>ReturnPlot:</b>
 <br>
 <img src="{% static "return.png"%}?cachebuster=blah24" height="400", width="1000"/>
@@ -48,6 +49,7 @@ Associated tickers in {{year}} {{qtr}}</b>:
 <img src="{% static "foo.png"%}?cachebuster=blah23" height="400", width="1000"/>
 	</div>
 	  </div>
+-->
 {% endif %}
 
 <!-- table for keywords -->
