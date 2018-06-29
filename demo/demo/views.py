@@ -72,7 +72,9 @@ def search_ticker(request):
         pd.set_option('display.max_colwidth', -1)
         pd.set_option('display.width', None)
 
-        output = r'<input class="form-control" id="myInput" type="text" placeholder="Search..">'
+
+        output = ''
+        output += r'<input class="form-control" id="myInput" type="text" placeholder="Search..">'
         output += HTML(sort_df.to_html(escape = False)).__html__().replace('<td><a ', '<td nowrap><a ').replace('class="dataframe"', 'class="table table-bordered table-striped"').replace(r'<tbody>', r'<tbody id="myTable">')
         
         output += r'''
@@ -116,6 +118,28 @@ $(document).ready(function(){
         context = {'year':year, 'qtr':qtr, 'word': word, 'tickers': tickers, 'news':news, 'from_date': from_date, 'to_date': to_date}
         return render(request, 'demo/home.html', context)
 
+def report(request):
+    try:
+        year = request.GET['year']
+    except:
+        return render(request, 'demo/report.html')
+
+    qtr = request.GET['qtr']
+    word = request.GET['word']
+    ticker = request.GET['ticker']
+
+    import json
+    with open('ticker_to_cik.json', 'r') as json_file:
+        ticker_to_cik = json.load(json_file)
+    cik = ticker_to_cik[ticker]
+    print(cik)
+
+    some_text = Tool.generateTextForTicker(ticker, year, cik, qtr)
+
+    context = {'year':year, 'qtr':qtr, 'word': word, 'tickers': ticker , 'ticker': ticker, 'text': some_text}
+
+    return render(request, 'demo/report.html', context)
+
 '''
 def search_word(request):
     #year = request.GET['year']
@@ -124,3 +148,7 @@ def search_word(request):
     
     return render(request, 'demo/word_search.html', {'year': word.replace(' ','')})
 '''
+
+    
+
+

@@ -427,8 +427,8 @@ def wordOfQuarter(new_df, filter_df, qtr):
     
     temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median', 'std']].dropna().merge(filter_df[['word:',qtr]], left_on = ['word:'], right_on = ['word:'])
     temp_df2.columns = ['key_word', 'annualized_return_percentage_mean','median','std', 'tickers']
-    temp_df2['annualized_return_percentage_mean'] = temp_df2['annualized_return_percentage_mean'].apply(lambda x: ((x/100.0+1)**4-1)*100)
-    temp_df2['median'] = temp_df2['median'].apply(lambda x: ((x/100.0+1)**4-1)*100)    
+    temp_df2['annualized_return_percentage_mean'] = temp_df2['annualized_return_percentage_mean']
+    temp_df2['median'] = temp_df2['median']
     return temp_df2
 
     
@@ -572,6 +572,9 @@ def plotSenti(text):
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
+    if text is None or len(text)==0:
+        print('no text')
+        return 
     senti_result=comprehend.detect_sentiment(Text = text , LanguageCode='en')
     
     ###################################################################
@@ -610,4 +613,21 @@ def plotSenti(text):
     plt.tight_layout()
     plt.savefig(r'common_static/senti.png', format = 'png')
     plt.clf()
+
+def generateTextForTicker(ticker, year,  cik, qtr):
+    import os
+    import numpy as np
+    import re
+    prog = re.compile(r'@@pannasfs1@secfilings@sec@edgar@10KQFilings@10-[K|Q]@%s@%s@parsed@edgar_data_(.*?)_'%(year,qtr))
+    
+    Folder = r'/home/nfs/azhou/demo/django-bootstrap3/demo/demo/transcript/10KQ_Count_transcipt/%s_%s/raw'%(year, qtr)
+    item_list=os.listdir(Folder)
+    res_list = []
+    for item in item_list:
+        cik2 = prog.match(item)[1] if prog.match(item) is not None else [0,'not_available']
+        if  str(cik) == cik2:  
+            with open(os.path.join(Folder,item)) as file1:
+                output = (file1.read())
+                return output
+    return None
 
