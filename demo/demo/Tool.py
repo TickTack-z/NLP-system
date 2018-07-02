@@ -628,6 +628,9 @@ def generateTextForTicker(ticker, year,  cik, qtr):
         if  str(cik) == cik2:  
             with open(os.path.join(Folder,item)) as file1:
                 output = (file1.read())
+                output = '<span class="media">' + output
+                output = output.replace('\n', '<br /></span> <span class = "media">')
+
                 return output
     return None
 
