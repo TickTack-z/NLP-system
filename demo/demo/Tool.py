@@ -618,19 +618,37 @@ def generateTextForTicker(ticker, year,  cik, qtr):
     import os
     import numpy as np
     import re
-    prog = re.compile(r'@@pannasfs1@secfilings@sec@edgar@10KQFilings@10-[K|Q]@%s@%s@parsed@edgar_data_(.*?)_'%(year,qtr))
-    
-    Folder = r'/home/nfs/azhou/demo/django-bootstrap3/demo/demo/transcript/10KQ_Count_transcipt/%s_%s/raw'%(year, qtr)
-    item_list=os.listdir(Folder)
-    res_list = []
-    for item in item_list:
-        cik2 = prog.match(item)[1] if prog.match(item) is not None else [0,'not_available']
-        if  str(cik) == cik2:  
-            with open(os.path.join(Folder,item)) as file1:
-                output = (file1.read())
-                output = '<span class="media">' + output
-                output = output.replace('\n', '<br /></span> <span class = "media">')
+    if qtr != '':
+        prog = re.compile(r'@@pannasfs1@secfilings@sec@edgar@10KQFilings@10-[K|Q]@%s@%s@parsed@edgar_data_(.*?)_'%(year,qtr))
+        
+        Folder = r'/home/nfs/azhou/demo/django-bootstrap3/demo/demo/transcript/10KQ_Count_transcipt/%s_%s/raw'%(year, qtr)
+        item_list=os.listdir(Folder)
+        res_list = []
+        for item in item_list:
+            cik2 = prog.match(item)[1] if prog.match(item) is not None else [0,'not_available']
+            if  str(cik) == cik2:  
+                with open(os.path.join(Folder,item)) as file1:
+                    output = (file1.read())
+                    output = '<div class="media">' + output
+                    output = output.replace('\n', '</div> <div class = "media">')
 
-                return output
+                    return output
+    else:
+        for qtr in ['QTR1','QTR2','QTR3','QTR4']:
+            prog = re.compile(r'@@pannasfs1@secfilings@sec@edgar@10KQFilings@10-K@%s@%s@parsed@edgar_data_(.*?)_'%(year,qtr))
+            
+            Folder = r'/home/nfs/azhou/demo/django-bootstrap3/demo/demo/transcript/10KQ_Count_transcipt/%s_%s/raw'%(year, qtr)
+            item_list=os.listdir(Folder)
+            res_list = []
+            for item in item_list:
+                cik2 = prog.match(item)[1] if prog.match(item) is not None else [0,'not_available']
+                if  str(cik) == cik2:  
+                    with open(os.path.join(Folder,item)) as file1:
+                        output = (file1.read())
+                        output = '<div class="media">' + output
+                        output = output.replace('\n', '</div> <div class = "media">')
+                        return output
     return None
 
+def returnWordList(filter_df):
+    return filter_df['word:'].tolist()

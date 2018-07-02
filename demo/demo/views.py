@@ -45,7 +45,6 @@ class SearchTicker(TemplateView):
         context = super(SearchTicker, self).get_context_data(**kwargs)
         return context
     
-    
 def search_ticker(request):
     #KQ = request.GET['KQ']
     word_return_df = pd.read_pickle('word_return_3month_full.pickle')
@@ -135,8 +134,13 @@ def report(request):
     print(cik)
 
     some_text = Tool.generateTextForTicker(ticker, year, cik, qtr)
+    
 
-    context = {'year':year, 'qtr':qtr, 'word': word, 'tickers': ticker , 'ticker': ticker, 'text': some_text}
+    filter_df = pd.read_pickle('filtered.pickle') 
+    word_list = Tool.returnWordList(filter_df)
+    word_list = list(filter(lambda x: x in some_text, word_list))
+    word_list = str(word_list).replace("'", '')
+    context = {'year':year, 'qtr':qtr, 'word': word, 'tickers': ticker , 'ticker': ticker, 'text': some_text, 'word_list': word_list}
 
     return render(request, 'demo/report.html', context)
 
@@ -149,6 +153,7 @@ def search_word(request):
     return render(request, 'demo/word_search.html', {'year': word.replace(' ','')})
 '''
 
-    
+
+
 
 
