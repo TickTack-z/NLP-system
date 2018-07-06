@@ -468,6 +468,7 @@ def wordOfYear(new_df, filter_df, year):
             temp_df.at[idx, str(year)+'QTR1'] += new_df.at[idx, columns]
             temp_filter_df.at[idx, str(year)+'QTR1'] += filter_df.at[idx, columns]
     qtr = columns = str(year)+'QTR1'
+
     for idx in temp_df.index:
         temp_df.at[idx, 'mean'] = np.mean(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=9 else np.nan
         temp_df.at[idx, 'median'] = np.median(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=9 else np.nan
@@ -476,12 +477,35 @@ def wordOfYear(new_df, filter_df, year):
     
     temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median' ,'std']].dropna().merge(temp_filter_df[['word:',qtr]], left_on = ['word:'], right_on = ['word:'])
     temp_df2.columns = ['key_word', 'return_percentage_mean','median','std', 'tickers']
-    temp_df2['return_percentage_mean'] = temp_df2['return_percentage_mean']
-    temp_df2['median'] = temp_df2['median']
     from collections import Counter
     #temp_df2['tickers'] = temp_df2['tickers'].apply(lambda x: list(set(x)))
     temp_df2['tickers'] = temp_df2['tickers'].apply(lambda x: [k for k,w in Counter(x).most_common() if w >3])
-    
+
+    import pickle
+    return_group_df = pd.read_pickle('return_group_df')
+    with open('ticker2QA_dict.pickle', 'rb') as handle:
+        ticker2QA_dict = pickle.load(handle)
+
+    def returnOfYear(return_group_df, ticker, year):
+        qaId = ticker2QA_dict[ticker]
+        year = pd._libs.tslibs.period.Period(str(int(year))+'-12')
+        return return_group_df.at[(qaId, year), 'Prior_12_month_return']
+
+    temp_df2['returns'] = temp_df2['key_word'].apply(lambda x: [])
+
+    for idx in temp_df2.index:
+        for ticker in temp_df2.at[idx, 'tickers']:
+            try:
+                temp_df2.at[idx, 'returns'].append(round(returnOfYear(return_group_df ,ticker,year),2))
+            except:
+                pass
+
+    for idx in temp_df2.index:
+        temp_df2.at[idx, 'return_percentage_mean'] = np.mean(temp_df2.at[idx, 'returns'])        
+        temp_df2.at[idx, 'median'] = np.median(temp_df2.at[idx, 'returns'])
+        temp_df2.at[idx, 'std'] = np.std(temp_df2.at[idx, 'returns'])
+
+    temp_df2 = temp_df2.sort_values('median', ascending=False).reset_index(drop=True)
     return temp_df2
 
 
