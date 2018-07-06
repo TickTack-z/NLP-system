@@ -397,7 +397,8 @@ def generateCluster(filter_df, quarter):
 
 '''
 def wordOfQuarter(new_df, qtr):
-    return new_df.sort_values(qtr, ascending=False)['word:'].tolist()'''
+    return new_df.sort_values(qtr, ascending=False)['word:'].tolist()
+'''
 
 
 # In[ ]:
@@ -425,10 +426,21 @@ def wordOfQuarter(new_df, filter_df, qtr):
         temp_df.at[idx, 'std'] = np.std(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=3 else np.nan
         
     
-    temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median', 'std']].dropna().merge(filter_df[['word:',qtr]], left_on = ['word:'], right_on = ['word:'])
-    temp_df2.columns = ['key_word', 'annualized_return_percentage_mean','median','std', 'tickers']
-    temp_df2['annualized_return_percentage_mean'] = temp_df2['annualized_return_percentage_mean']
+    temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median', 'std']].dropna().merge(filter_df[['word:', qtr, 'other_words']], left_on = ['word:'], right_on = ['word:'])
+    temp_df2.columns = ['key_word', 'return_percentage_mean','median','std', 'tickers', 'other_words']
+    temp_df2['return_percentage_mean'] = temp_df2['return_percentage_mean']
     temp_df2['median'] = temp_df2['median']
+
+    def make_clickable(vals,key_word):
+        res = []
+        for val in vals:
+            res.append('<a href="http://eqlnxwork1.panagora.com:8000/report/?year={}&qtr={}&ticker={}&word={}">{}</a>'.format(qtr[:4],qtr[-4:],val, key_word, val))
+        return res
+
+    for idx in temp_df2.index:
+        key_word = temp_df2.at[idx, 'key_word'] 
+        temp_df2.at[idx, 'tickers'] = make_clickable(temp_df2.at[idx, 'tickers'], key_word)
+
     return temp_df2
 
     
@@ -475,8 +487,8 @@ def wordOfYear(new_df, filter_df, year):
         temp_df.at[idx, 'std'] = np.std(temp_df.at[idx, columns]) if len(temp_df.at[idx, columns])>=9 else np.nan
 
     
-    temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median' ,'std']].dropna().merge(temp_filter_df[['word:',qtr]], left_on = ['word:'], right_on = ['word:'])
-    temp_df2.columns = ['key_word', 'return_percentage_mean','median','std', 'tickers']
+    temp_df2 = temp_df.sort_values('median', ascending=False)[['word:' , 'mean', 'median' ,'std']].dropna().merge(temp_filter_df[['word:',qtr, 'other_words']], left_on = ['word:'], right_on = ['word:'])
+    temp_df2.columns = ['key_word', 'return_percentage_mean','median','std', 'tickers', 'other_words']
     from collections import Counter
     #temp_df2['tickers'] = temp_df2['tickers'].apply(lambda x: list(set(x)))
     temp_df2['tickers'] = temp_df2['tickers'].apply(lambda x: [k for k,w in Counter(x).most_common() if w >3])
@@ -505,7 +517,22 @@ def wordOfYear(new_df, filter_df, year):
         temp_df2.at[idx, 'median'] = np.median(temp_df2.at[idx, 'returns'])
         temp_df2.at[idx, 'std'] = np.std(temp_df2.at[idx, 'returns'])
 
+    #this is hardcode:
+    temp_df2 = temp_df2[temp_df2['key_word']!='prior systemic therapy']
     temp_df2 = temp_df2.sort_values('median', ascending=False).reset_index(drop=True)
+
+    def make_clickable(vals,key_word):
+        res = []
+        for val in vals:
+            res.append('<a href="http://eqlnxwork1.panagora.com:8000/report/?year={}&qtr=&ticker={}&word={}">{}</a>'.format(year,val, key_word, val))
+        return res
+
+    for idx in temp_df2.index:
+        key_word = temp_df2.at[idx, 'key_word'] 
+        temp_df2.at[idx, 'tickers'] = make_clickable(temp_df2.at[idx, 'tickers'], key_word)
+    
+
+
     return temp_df2
 
 
@@ -669,6 +696,7 @@ def generateTextForTicker(ticker, year,  cik, qtr):
                 if  str(cik) == cik2:  
                     with open(os.path.join(Folder,item)) as file1:
                         output = (file1.read())
+                        output = output.lower()
                         output = '<div class="media">' + output
                         output = output.replace('\n', '</div> <div class = "media">')
                         return output
